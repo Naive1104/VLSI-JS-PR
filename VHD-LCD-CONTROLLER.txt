@@ -1,0 +1,135 @@
+Program for LCD CONTROLLER :
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity LCD_CONTROLLER is
+    port (
+        clk   : in  std_logic;
+        d_out : out std_logic_vector(7 downto 0);
+        rs, rw, en : out std_logic
+    );
+end LCD_CONTROLLER;
+
+architecture Behavioral of LCD_CONTROLLER is
+    type state_type is (
+        s0, s1, s2, s3, s4, s5, s6, s7,
+        s8, s9, s10, s11, s12, s13, s14, s15
+    );
+
+    signal pr_state, ns_state : state_type := s0;
+    signal clk_lcd : std_logic_vector(15 downto 0) := (others => '0');
+begin
+
+    -- Clock Divider
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            clk_lcd <= std_logic_vector(unsigned(clk_lcd) + 1);
+        end if;
+    end process;
+
+    -- State Transition Process
+    process(clk_lcd(15))
+    begin
+        if rising_edge(clk_lcd(15)) then
+            pr_state <= ns_state;
+        end if;
+    end process;
+
+    -- Output and Next-State Logic
+    process(pr_state)
+    begin
+        case pr_state is
+            when s0  => d_out <= x"38"; rs <= '0'; rw <= '0'; en <= '1'; ns_state <= s1;
+            when s1  => d_out <= x"38"; rs <= '0'; rw <= '0'; en <= '0'; ns_state <= s2;
+            when s2  => d_out <= x"0C"; rs <= '0'; rw <= '0'; en <= '1'; ns_state <= s3;
+            when s3  => d_out <= x"0C"; rs <= '0'; rw <= '0'; en <= '0'; ns_state <= s4;
+            when s4  => d_out <= x"06"; rs <= '0'; rw <= '0'; en <= '1'; ns_state <= s5;
+            when s5  => d_out <= x"06"; rs <= '0'; rw <= '0'; en <= '0'; ns_state <= s6;
+            when s6  => d_out <= x"01"; rs <= '0'; rw <= '0'; en <= '1'; ns_state <= s7;
+            when s7  => d_out <= x"01"; rs <= '0'; rw <= '0'; en <= '0'; ns_state <= s8;
+            when s8  => d_out <= x"53"; rs <= '1'; rw <= '0'; en <= '1'; ns_state <= s9;
+            when s9  => d_out <= x"53"; rs <= '1'; rw <= '0'; en <= '0'; ns_state <= s10;
+            when s10 => d_out <= x"49"; rs <= '1'; rw <= '0'; en <= '1'; ns_state <= s11;
+            when s11 => d_out <= x"49"; rs <= '1'; rw <= '0'; en <= '0'; ns_state <= s12;
+            when s12 => d_out <= x"54"; rs <= '1'; rw <= '0'; en <= '1'; ns_state <= s13;
+            when s13 => d_out <= x"54"; rs <= '1'; rw <= '0'; en <= '0'; ns_state <= s14;
+            when s14 => d_out <= x"53"; rs <= '1'; rw <= '0'; en <= '1'; ns_state <= s15;
+            when s15 => d_out <= x"53"; rs <= '1'; rw <= '0'; en <= '0'; ns_state <= s15;
+        end case;
+    end process;
+
+end Behavioral;
+
+TESTBENCH
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity test is
+end test;
+
+architecture Behavioral of test is
+
+    -- Component Declaration for the Unit Under Test (UUT)
+    component LCD_CONTROLLER
+        port (
+            clk   : in  std_logic;
+            d_out : out std_logic_vector(7 downto 0);
+            rs, rw, en : out std_logic
+        );
+    end component;
+
+    -- Testbench Signals
+    signal clk_tb   : std_logic := '0';
+    signal d_out_tb : std_logic_vector(7 downto 0);
+    signal rs_tb, rw_tb, en_tb : std_logic;
+
+    constant CLK_PERIOD : time := 10 ns;
+
+begin
+
+    -- Instantiate the UUT
+    uut: LCD_CONTROLLER
+        port map (
+            clk   => clk_tb,
+            d_out => d_out_tb,
+            rs    => rs_tb,
+            rw    => rw_tb,
+            en    => en_tb
+        );
+
+    -- Clock Generation Process
+    clk_process : process
+    begin
+        while true loop
+            clk_tb <= '0';
+            wait for CLK_PERIOD / 2;
+            clk_tb <= '1';
+            wait for CLK_PERIOD / 2;
+        end loop;
+    end process;
+
+    -- Stimulus Process
+    stim_proc: process
+    begin
+        -- Wait sufficient time to observe full FSM sequence
+        wait for 5 ms;  
+        wait;  -- stop simulation
+    end process;
+
+end Behavioral;
+
+UCF For LCD Controller :
+NET "clk"        LOC = "P181";
+NET "d_out<0>"   LOC = "P167";
+NET "d_out<1>"   LOC = "P166";
+NET "d_out<2>"   LOC = "P165";
+NET "d_out<3>"   LOC = "P162";
+NET "d_out<4>"   LOC = "P161";
+NET "d_out<5>"   LOC = "P156";
+NET "d_out<6>"   LOC = "P155";
+NET "d_out<7>"   LOC = "P154";
+NET "en"         LOC = "P168";
+NET "rs"         LOC = "P171";
+NET "rw"         LOC = "P169";

@@ -1,0 +1,99 @@
+VLSI Practical
+4-Bit Arithmetic Logic Unit:
+ 
+CODE:
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+entity alu_4bit is
+    Port (
+        a, b   : in  STD_LOGIC_VECTOR(3 downto 0);
+        opcode : in  STD_LOGIC_VECTOR(2 downto 0);
+        y      : out STD_LOGIC_VECTOR(4 downto 0)
+    );
+end alu_4bit;
+architecture Behavioral of alu_4bit is
+    signal as, bs, ys : STD_LOGIC_VECTOR(4 downto 0);
+begin
+    as <= '0' & a;
+    bs <= '0' & b;
+    process(as, bs, opcode)
+    begin
+        case opcode is
+            when "000" => ys <= as + bs;          -- ADD
+            when "001" => ys <= as - bs;          -- SUB
+            when "010" => ys <= as and bs;        -- AND
+            when "011" => ys <= as nand bs;       -- NAND
+            when "100" => ys <= as xor bs;        -- XOR
+            when "101" => ys <= as xnor bs;       -- XNOR
+            when "110" => ys <= as or bs;         -- OR
+            when others => ys <= '0' & as(3 downto 0);  -- Pass A
+        end case;
+    end process;
+    y <= ys;
+end Behavioral;
+
+
+TESTBENCH
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+entity test is
+end test;
+architecture behavior of test is
+    -- Component Declaration
+    component alu_4bit
+        Port (
+            a, b   : in  STD_LOGIC_VECTOR(3 downto 0);
+            opcode : in  STD_LOGIC_VECTOR(2 downto 0);
+            y      : out STD_LOGIC_VECTOR(4 downto 0)
+        );
+    end component;
+    -- Signals for interconnection
+    signal a_tb, b_tb   : STD_LOGIC_VECTOR(3 downto 0);
+    signal opcode_tb    : STD_LOGIC_VECTOR(2 downto 0);
+    signal y_tb         : STD_LOGIC_VECTOR(4 downto 0);
+begin
+    -- Instantiate the Unit Under Test (UUT)
+    uut: alu_4bit
+        port map (
+            a => a_tb,
+            b => b_tb,
+            opcode => opcode_tb,
+            y => y_tb
+        );
+    -- Stimulus Process
+    process
+    begin
+        a_tb <= "0101"; b_tb <= "0011"; opcode_tb <= "000"; wait for 10 ns;  -- ADD
+        opcode_tb <= "001"; wait for 10 ns;  -- SUB
+        opcode_tb <= "010"; wait for 10 ns;  -- AND
+        opcode_tb <= "011"; wait for 10 ns;  -- NAND
+        opcode_tb <= "100"; wait for 10 ns;  -- XOR
+        opcode_tb <= "101"; wait for 10 ns;  -- XNOR
+        opcode_tb <= "110"; wait for 10 ns;  -- OR
+        opcode_tb <= "111"; wait for 10 ns;  -- Default / Pass A
+        wait;
+    end process;
+end behavior;
+
+
+UCF 
+NET "a<0>"  LOC= "p57";
+NET "a<1>"  LOC= "p52";
+NET "a<2>"  LOC= "p51";
+NET "a<3>"  LOC= "p50";
+NET "b<0>"  LOC= "p43";
+NET "b<1>"  LOC= "p42";
+NET "b<2>"  LOC= "p40";
+NET "b<3>"  LOC= "p39";
+NET "opcode<0>"  LOC= "p36";
+NET "opcode<1>"  LOC= "p35";
+NET "opcode<2>"  LOC= "p34";
+NET "y<0>"  LOC= "p80";
+NET "y<1>"  LOC= "p79";
+NET "y<2>"  LOC= "p78";
+NET "y<3>"  LOC= "p77";
+NET "y<4>"  LOC= "p76";

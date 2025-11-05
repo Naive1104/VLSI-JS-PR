@@ -1,0 +1,93 @@
+MOD N Counter
+CODE
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+
+entity counter is
+    Port ( clk : in  STD_LOGIC;
+           count : out  STD_LOGIC_VECTOR (3 downto 0));
+end counter;
+
+architecture Behavioral of counter is
+signal s:std_logic_vector(3 downto 0):="0000";
+signal s1:std_logic_vector(20 downto 0):=(others=>'0');
+signal sclk:std_logic:='0';
+begin
+process(clk)
+begin
+if(clk'event and clk='1')then
+s1<=s1+1;
+end if;
+end process;
+sclk<=s1(20);
+
+process(sclk)
+begin
+if(sclk'event and sclk='1')then
+s<=s+1;
+end if;
+end process;
+count<=s;  
+end Behavioral;
+
+
+TESTBENCH
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity test is
+end test;
+
+architecture Behavioral of test is
+
+    -- Component Declaration
+    component counter
+        Port (
+            clk   : in  STD_LOGIC;
+            count : out STD_LOGIC_VECTOR (3 downto 0)
+        );
+    end component;
+
+    -- Testbench Signals
+    signal clk_tb   : std_logic := '0';
+    signal count_tb : std_logic_vector(3 downto 0);
+
+    constant CLK_PERIOD : time := 10 ns;  -- 100 MHz clock
+
+begin
+
+    -- Instantiate the Unit Under Test (UUT)
+    uut: counter
+        port map (
+            clk   => clk_tb,
+            count => count_tb
+        );
+
+    -- Clock generation process
+    clk_process : process
+    begin
+        while true loop
+            clk_tb <= '0';
+            wait for CLK_PERIOD / 2;
+            clk_tb <= '1';
+            wait for CLK_PERIOD / 2;
+        end loop;
+    end process;
+
+    -- Simulation process
+    stim_proc: process
+    begin
+        -- Wait long enough to see the counter increment
+        wait for 200 ms;   -- Adjust as needed (since sclk divides by 2^21)
+        wait;
+    end process;
+end Behavioral;
+
+UCF
+NET "clk" LOC="p181";
+NET "count<0>" LOC="p80";
+NET "count<1>" LOC="p79";
+NET "count<2>" LOC="p78";
+NET "count<3>" LOC="p77";
